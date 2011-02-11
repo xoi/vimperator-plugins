@@ -114,7 +114,8 @@ UASwitcherLite.prototype = {
   },
   switch: function(appName, appVersion, platform, userAgent, vendor, vendorSub){
     if (!userAgent && !options.getPref(USER_AGENT)) return;
-    var setter = userAgent ? options.setPref : options.resetPref;
+    var setterFunc = userAgent ? options.setPref : options.resetPref;
+    function setter() { setterFunc.apply(options, arguments); }
     setter(APP_NAME, decodeURIComponent(appName || ''));
     setter(APP_VERSION, decodeURIComponent(appVersion || ''));
     setter(PLATFORM, decodeURIComponent(platform || ''));
