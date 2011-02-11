@@ -29,7 +29,7 @@
   var oldFilter,migemoPattern;
   modules.CompletionContext.prototype.match = function (str){
       var filter = this.filter;
-      if (!filter) return this._match(filter, str);
+      if (this.anchored || !filter) return this._match(filter, str);
       if (oldFilter != filter) migemoPattern = new RegExp(XMigemoTextUtils.sanitize(filter) + "|" + XMigemoCore.getRegExp(filter),"i");
 
       oldFilter = filter;
