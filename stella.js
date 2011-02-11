@@ -597,6 +597,7 @@ Thanks:
     let (seek = this.has('currentTime', 'rw', 'totalTime', 'r') && 'x') {
       setf('seek', seek);
       setf('seekRelative', seek);
+      setf('seekKeyFrame', seek);
     }
     setf('playOrPause', this.has('play', 'x', 'pause', 'x') && 'x');
     setf('turnUpDownVolume', this.has('volume', 'rw') && 'x');
@@ -742,6 +743,36 @@ Thanks:
 
     seekRelative: function (v)
       this.currentTime = Math.min(Math.max(this.currentTime + U.fromTimeCode(v, this.totalTime), 0), this.totalTime),
+
+    seekKeyFrame: function (v) {
+      v = U.fromTimeCode(v, this.totalTime);
+      let sign = v < 0 ? -1 : 1;
+      v = Math.min(Math.max(this.currentTime + v, 0), this.totalTime);
+      let tryPosition = v;
+      let self = this;
+      function waitProc(cond, proc, interval) {
+        function func() {
+          if (cond()) {
+            proc();
+          }
+          else {
+            content.setTimeout(func, interval);
+          }
+        }
+        func();
+      }
+      function seekWhile() {
+        self.currentTime = tryPosition;
+        tryPosition += sign;
+        function proc() {
+          if (sign * (self.currentTime - v) < 0) {
+            seekWhile();
+          }
+        }
+        waitProc(function() { return self.player.ext_getStatus() !== 'seeking'; }, proc, 1);
+      }
+      seekWhile();
+    },
 
     toggle: function (name) {
       if (!this.has(name, 'rwt'))
@@ -1953,6 +1984,7 @@ Thanks:
       add('co[mment]', 'comment');
       add('vo[lume]', 'volume', 'turnUpDownVolume');
       add('se[ek]', 'seek', 'seekRelative');
+      add('seekk[eyframe]', 'seekKeyFrame');
       add('fe[tch]', 'fetch');
       add('la[rge]', 'large');
       add('fu[llscreen]', 'fullscreen');
