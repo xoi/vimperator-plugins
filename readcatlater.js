@@ -226,6 +226,7 @@ let PLUGIN_INFO =
     context.compare = void 'meow';
     context.title = ['URL', 'Title'];
     context.filters = [CompletionContext.Filter.textDescription];
+    context.anchored = false;
     context.completions = RCL_Bookmarks().
                             filter(function (it) it.id).
                             map(function (it) [it.URI, bookmarks.getItemTitle(it.id)]).
