@@ -130,8 +130,7 @@ liberator.plugins.LocalKeyMode = (function() {
       panel.setAttribute('class', 'statusbarpanel-iconic');
       panel.setAttribute('src', self.isEnable ? ENABLE_ICON : DISABLE_ICON);
       panel.addEventListener('click', function(e) { self.isEnable = !self.isEnable; }, false);
-      document.getElementById('status-bar').insertBefore(
-        panel, document.getElementById('security-button').nextSibling);
+      document.getElementById('status-bar').appendChild(panel);
       return panel;
     },
     get isEnable() _isEnable,
