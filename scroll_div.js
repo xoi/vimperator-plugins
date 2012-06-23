@@ -61,8 +61,10 @@
     let doc = content.document;
     let idx = doc.__div_scroller_index || 0;
     let es = scrollableElements();
-    if (es.length <= 0)
+    if (es.length <= 0) {
       liberator.echoerr('scrollable element not found');
+      return;
+    }
     idx += (n || 1);
     if (idx < 0)
       idx = es.length - 1;
