@@ -8,6 +8,6 @@
 
 {
   // TODO: It might be better to poll.
-  let src = commandline._echoMultiline.toSource().replace('commandline.updateOutputHeight(true);', '$&setTimeout(function() {commandline.updateOutputHeight(false);}, 50);');
+  let src = commandline._echoMultiline.toSource().replace('commandline.updateOutputHeight(true);', '$&setTimeout(function() {commandline.updateOutputHeight(false);}, 100);');
   commandline._echoMultiline = eval(src);
 }
