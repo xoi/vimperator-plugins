@@ -99,7 +99,7 @@
   }
 
   function getItemById(id) document.getElementById("smileFoxListItem" + id)
-  function allItems() Array.slice(document.getElementById("smilefoxList").childNodes)	// childrenだとappendChild直後に取れない
+  function allItems() Array.slice(document.getElementById("nicofoxDownloadList").childNodes)	// childrenだとappendChild直後に取れない
   function noop() {}
   var onUpdateDownloadItem = noop;
   var onCompleteLoadPanel = noop;
