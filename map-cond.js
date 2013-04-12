@@ -46,7 +46,7 @@ events._input.watch("buffer", function(id, oldval, newval) {
 let (orig = Map.prototype.execute) {
   Map.prototype.execute = function() {
     var ret = orig.apply(this, arguments);
-    util.extend(activeMapGroups, this.__group);
+    update(activeMapGroups, this.__group);
     return ret;
   }
 }

@@ -43,7 +43,7 @@
       var item = getItemById(id);
 
       // clean files
-      ["sfvideofile", "sfcommentfile", "sfuploadercommentfile", util.extend(new String("thumbnail"), { uri: true })].forEach(function(attr) {
+      ["sfvideofile", "sfcommentfile", "sfuploadercommentfile", update(new String("thumbnail"), { uri: true })].forEach(function(attr) {
 	if (item.hasAttribute(attr)) {
 	  var path = item.getAttribute(attr);
 	  if (attr.uri) {

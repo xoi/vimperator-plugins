@@ -39,13 +39,13 @@
   let mainWindow = document.documentElement;
 
   // :set! browser.fullscreen.autohide=false 前提
-  var navHider = util.extend(new Hider(), {
+  var navHider = update(new Hider(), {
     delay: 1000,
     target: gNavToolbox,
     hiddenClassName: "liberator-hidden"
   });
 
-  var msgHider = util.extend(new Hider(), {
+  var msgHider = update(new Hider(), {
     delay: 5000,
     target: mainWindow,
     hiddenClassName: "liberator-message-hidden"
