@@ -87,7 +87,7 @@
       var marginTop = -contentRect.top;
       var marginBottom = contentRect.bottom - windowRect.height;
 
-      styles.addSheet(true, "fullscreen-hidden", "chrome://*", <><![CDATA[
+      styles.addSheet(true, "fullscreen-hidden", "chrome://*", `
 	:-moz-any(#navigator-toolbox, #liberator-separator, #liberator-bottombar) {
 	  -moz-transition-duration: 0.25s;
 	}
@@ -95,19 +95,19 @@
 	  opacity: 0;
 	}
 	#main-window[inFullscreen] #navigator-toolbox {
-	  margin-top: ]]>{marginTop}<![CDATA[px;
+	  margin-top: ${marginTop}px;
 	}
 	#main-window[inFullscreen] #navigator-toolbox:not(.liberator-hidden) {
-	  -moz-transform: translateY(]]>{-marginTop}<![CDATA[px);
+	  -moz-transform: translateY(${-marginTop}px);
 	}
 	#main-window[inFullscreen].liberator-message-hidden.liberator-commandline-hidden #liberator-bottombar {
-	  margin-bottom: ]]>{marginBottom}<![CDATA[px;
+	  margin-bottom: ${marginBottom}px;
 	}
 	#main-window[inFullscreen]:-moz-any(:not(.liberator-message-hidden), :not(.liberator-commandline-hidden)) #liberator-separator {
-	  margin-top: ]]>{marginBottom}<![CDATA[px;
+	  margin-top: ${marginBottom}px;
 	  -moz-transform: translate(0);
 	}
-      ]]></>.toString());
+      `);
     }
   );
 })();

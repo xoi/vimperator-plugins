@@ -114,7 +114,7 @@
 	description: function(item) item.getAttribute("sfvideotitle")
       };
       let process = context.process;
-      process[1] = function(item, text) <><img src={item.item.getAttribute("thumbnail")} style="margin-right: 0.5em; height: 3em; vertical-align: middle;"/><div style="display: inline-block; vertical-align: middle;">{text}<br/>{item.item.getAttribute("sfvideoinfo")}</div></>;
+      process[1] = function(item, text) xml`<img src=${item.item.getAttribute("thumbnail")} style="margin-right: 0.5em; height: 3em; vertical-align: middle;"/><div style="display: inline-block; vertical-align: middle;">${text}<br/>${item.item.getAttribute("sfvideoinfo")}</div>`;
       context.process = process;
       if (nicofox.panel.loaded) {
 	context.completions = allItems();
