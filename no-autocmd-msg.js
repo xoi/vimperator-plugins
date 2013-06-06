@@ -8,7 +8,7 @@
 
 {
   let src = autocommands.trigger.toSource()
-    .replace('var lastPattern = null;', '')
-    .replace('if (!lastPattern || lastPattern.source != autoCmd.pattern.source) {liberator.echomsg("Executing " + event + " Auto commands for \\"" + autoCmd.pattern.source + "\\"");}lastPattern = autoCmd.pattern;', '');
+    .replace('let lastPattern = null;', '')
+    .replace('if (!lastPattern || lastPattern.source != autoCmd.pattern.source)\n                    liberator.echomsg("Executing " + event + " Auto commands for \\"" + autoCmd.pattern.source + "\\"");\n\n                lastPattern = autoCmd.pattern;', '');
   autocommands.trigger = eval(src);
 }
