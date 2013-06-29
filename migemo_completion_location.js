@@ -25,7 +25,7 @@
   });
   var service = createFromPrototype(XMigemoLocationBarOverlay);
   service.startSearch = function(searchString, extra, lastResult, listener) {
-    this.inputValue = XMigemoCore.trimFunctionalInput(searchString);
+    this.inputValue = migemo.trimFunctionalInput(searchString);
     if (this.isMigemoActive) {
       this.listener = listener;
       this.onSearchBegin();
