@@ -1253,7 +1253,7 @@ let INFO = xml`
                   callback(d.responseText);
               }
             }else{
-              callback(d.statusText);
+              throw d.statusText || d.toString();
             }
           },
         };
@@ -1286,7 +1286,7 @@ let INFO = xml`
               }
             } else {
               // typeof d == object
-              callback(d);
+              throw d.statusText || d.toString();
             }
           }
         };
@@ -1315,7 +1315,7 @@ let INFO = xml`
                   callback(d.responseText);
               }
             }else{
-              callback(d.statusText);
+              throw d.statusText;
             }
           },
         };
@@ -1636,7 +1636,7 @@ let INFO = xml`
   }; // }}}
   let Twitter = { // {{{
     destroy: function(id) { // {{{
-      tw.jsonDelete("statuses/destroy/" + id, null, function(res) {
+      tw.jsonPost("statuses/destroy/" + id, null, function(res) {
         res = Utils.fixStatusObject(res);
         Twittperator.echo("delete: " + res.user.name + " " + res.text)
       });
@@ -2135,7 +2135,7 @@ let INFO = xml`
     notMine: function (st)
       let (n = setting.screenName)
         (n ? (!st.user || st.user.screen_name !== n) : st),
-    mine: function (st)
+    selectMine: function (st)
       (!Predicates.notMine(st))
   }; // }}}
   let Completers = (function() { // {{{
