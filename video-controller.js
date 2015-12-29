@@ -92,6 +92,9 @@ let INFO = xml`
     pause: function (elem) {
       elem.pause();
     },
+    playOrPause: function (elem) {
+      elem.paused ? elem.play() : elem.pause();
+    },
     volume: function (elem, value) {
       value = parseFloat(value);
       elem.volume = Math.min(value > 1 ? value / 100 : value, 100);
@@ -101,6 +104,9 @@ let INFO = xml`
     },
     seek: function (elem, value) {
       elem.currentTime = timeCodeToSec(value);
+    },
+    playbackRate: function (elem, value) {
+      elem.playbackRate = value;
     }
   };
 
@@ -120,19 +126,22 @@ let INFO = xml`
     },
     {
       subCommands: [
-        let (o = o) new Command(
-          [o[0] + '[' + o.slice(1) + ']'],
-          o + ' <video>',
-          function (args) {
-            lastCommand = o;
-            lastArgs = args;
-            hints.show(HintName);
-          },
-          {
-            literal: 0
-          }
-        )
-        for (o in controlls)
+        (function () {
+          let o = it;
+          return new Command(
+            [o[0] + '[' + o.slice(1) + ']'],
+            o + ' <video>',
+            function (args) {
+              lastCommand = o;
+              lastArgs = args;
+              hints.show(HintName);
+            },
+            {
+              literal: 0
+            }
+          )
+        })()
+        for (it in controlls)
       ],
     },
     true

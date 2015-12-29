@@ -1,6 +1,6 @@
 /* NEW BSD LICENSE {{{
 Copyright (c) 2009-2010, anekos.
-Copyright (c) 2012-2013, Jagua.
+Copyright (c) 2012-2015, Jagua.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -35,7 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 // INFO {{{
 let INFO = xml`
-<plugin name="Microsoft Translator" version="1.0.1"
+<plugin name="Microsoft Translator" version="1.1.0"
         href="http://github.com/vimpr/vimperator-plugins/blob/master/microsoft-translator.js"
         summary="Translate with Microsoft AJAX Language API"
         xmlns="http://vimperator.org/namespaces/liberator">
@@ -54,9 +54,9 @@ let INFO = xml`
         Translate!!!!!!!!!!!
       </p>
       <p>
-        You need to get an Access Token from http://www.bing.com/developers/appids.aspx
-        to use this plugin. and add liberator.globalVariables.mstrans_appid setting
-        to your ".vimperatorrc".
+        You need to get an Access Token from http://msdn.microsoft.com/en-us/library/hh454950.aspx
+        to use this plugin. and add g:microsoft_translator_client_id and
+        g:microsoft_translator_client_secret settings to your ".vimperatorrc".
       </p>
       <p>The following options are interpreted.</p>
       <dl>
@@ -124,6 +124,15 @@ let INFO = xml`
     ['', 'Unknown']
   ];
 
+  const config = {
+    access_token: liberator.globalVariables.mstrans_appid || '',
+    expires: 0,
+    get client_id ()
+      liberator.globalVariables.microsoft_translator_client_id,
+    get client_secret ()
+      liberator.globalVariables.microsoft_translator_client_secret,
+  };
+
   const settings = {
     get pair ()
       (liberator.globalVariables.microsoft_translator_pair || 'ja en').split(' '),
@@ -131,52 +140,93 @@ let INFO = xml`
       (liberator.globalVariables.microsoft_translator_actions || 'echo').split(' ')
   };
 
-  function guessRequest (appId, text, done) {
-    let url =
-      'http://api.microsofttranslator.com/V2/Ajax.svc/Detect' +
-      '?appId=' + appId +
-      '&text=' + encodeURIComponent(text);
-    let req =
-      new plugins.libly.Request(
-        url,
-        {
+  function auth(config, text, opts, callback) {
+    if (config.client_secret == undefined || (new Date()).getTime() / 1000 < config.expires) {
+      callback(config, text, opts);
+    } else {
+      let url = 'https://datamarket.accesscontrol.windows.net/v2/OAuth2-13';
+      let postBody =
+        'client_id=' + encodeURIComponent(config.client_id) +
+        '&client_secret=' + encodeURIComponent(config.client_secret) +
+        '&scope=http://api.microsofttranslator.com' +
+        '&grant_type=client_credentials';
+      let req =
+        new plugins.libly.Request(
+          url,
+          {
             Referrer: refererURL,
+          },
+          {
+            postBody: postBody,
+          }
+        );
+      req.addEventListener(
+        'onSuccess',
+        function (res) {
+          let token = JSON.parse(res.responseText);
+          if (token.hasOwnProperty('expires_in') && token.expires_in.match(/^\d+$/)) {
+            config.expires = (new Date()).getTime() / 1000 + parseInt(token.expires_in, 10);
+            config.access_token = token.access_token;
+            callback(config, text, opts);
+          }
         }
       );
-    req.addEventListener(
-      'onSuccess',
-      function (res) {
-        var result = res.responseText;
-        done(result.substring(1,result.length-1));
-      }
-    );
-    req.get();
+      req.post();
+    }
   }
 
-  function translateRequest (appId, text, opts /* from, to, done */) {
-    opts || (opts = {});
-    let url =
-      'http://api.microsofttranslator.com/V2/Ajax.svc/Translate' +
-      '?appId=' + appId +
-      '&text=' + encodeURIComponent(text) +
-      '&from=' + (opts.from || 'en') + '&to=' + (opts.to || 'ja') +
-      '&contentType=text/plain'  ;
-    let req =
-      new plugins.libly.Request(
-        url,
-        {
-            Referrer: refererURL,
+  function guessRequest (config, text, opts /* from, to, done */) {
+    auth(config, text, opts, function (config, text, opts) {
+      let url =
+        'http://api.microsofttranslator.com/V2/Ajax.svc/Detect' +
+        '?appId=' + (config.client_secret == undefined ? config.access_token : '') +
+        '&text=' + encodeURIComponent(text);
+      let req =
+        new plugins.libly.Request(
+          url,
+          {
+              Referrer: refererURL,
+              Authorization: 'Bearer ' + config.access_token,
+          }
+        );
+      req.addEventListener(
+        'onSuccess',
+        function (res) {
+          var result = res.responseText;
+          opts.done(result.substring(1,result.length-1));
         }
       );
-    req.addEventListener(
-      'onSuccess',
-      function (res) {
-        let translated = res.responseText;
-        liberator.log('translated: ' + translated);
-        opts.done(translated);
-      }
-    );
-    req.get();
+      req.get();
+    });
+  }
+
+  function translateRequest (config, text, opts /* from, to, done */) {
+    auth(config, text, opts, function (config, text, opts) {
+      opts || (opts = {});
+      let url =
+        'http://api.microsofttranslator.com/V2/Ajax.svc/Translate' +
+        '?appId=' + (config.client_secret == undefined ? config.access_token : '') +
+        '&text=' + encodeURIComponent(text) +
+        '&from=' + (opts.from || 'en') + '&to=' + (opts.to || 'ja') +
+        '&contentType=text/plain';
+      let req =
+        new plugins.libly.Request(
+          url,
+          {
+              Referrer: refererURL,
+              Authorization: 'Bearer ' + config.access_token,
+          }
+        );
+      req.addEventListener(
+        'onSuccess',
+        function (res) {
+          let translated = res.responseText;
+          liberator.log('translated: ' + translated);
+          opts.done(translated);
+        }
+      );
+      req.get();
+    });
   }
 
   // 何語か妄想する
@@ -232,6 +282,8 @@ let INFO = xml`
       function (text) util.copyToClipboard(text, true)
   };
 
+  let actionTypes = [n for (n in actions)];
+
   function makeListValidator (list)
     function (vs) (!vs || !vs.some(function (v) !list.some(function (at) (v == at))));
 
@@ -239,13 +291,12 @@ let INFO = xml`
     ['mstrans'],
     'Microsoft Translator',
     function (args) {
-      let appId = liberator.globalVariables.mstrans_appid;
       let text = args.literalArg;
       let actionNames = args['-action'] || settings.actions;
       let [from, to] = [args['-from'], args['-to']];
 
-      if (appId == undefined) {
-        liberator.echoerr('The setting of liberator.globalVariables.mstrans_appid in .vimperatorrc is required.');
+      if (config.client_id == undefined && config.client_secret == undefined && liberator.globalVariables.mstrans_appid == undefined) {
+        liberator.echoerr('The setting of g:microsoft_translator_client_(id|secret) in .vimperatorrc is required.');
         return false;
       }
 
@@ -254,9 +305,11 @@ let INFO = xml`
 
       if (args['-guess']) {
         guessRequest(
-          appId,
+          config,
           text,
-          function (lang) [liberator.echo("<p>"+v+"</p>",liberator.commandline.FORCE_MULTILINE) for ([, [k, v]] in Iterator(languages)) if (k == lang)]
+          {
+            done: function (lang) [liberator.echo("<p>"+v+"</p>",commandline.FORCE_MULTILINE) for ([, [k, v]] in Iterator(languages)) if (k == lang)]
+          }
         );
         return;
       }
@@ -268,14 +321,15 @@ let INFO = xml`
         actionNames.push('echo');
 
       function setPair () {
-        if ((!from ^ !to) && settings.pair.length >= 2)
-          let (v = settings.pair[(settings.pair[0] == (from || to)) - 0])
-            (from ? (to = v) : (from = v));
+        if ((!from ^ !to) && settings.pair.length >= 2) {
+          let v = settings.pair[(settings.pair[0] == (from || to)) - 0];
+          (from ? (to = v) : (from = v));
+        }
       }
 
       function req () {
         translateRequest(
-          appId,
+          config,
           text,
           {
             done: function (text) actionNames.forEach(function (name) actions[name](text)),
@@ -290,15 +344,17 @@ let INFO = xml`
         req();
       } else {
         guessRequest(
-          appId,
+          config,
           text,
-          function (fromLang) {
-            from = fromLang;
-            liberator.log('lang: ' + fromLang);
-            setPair();
-            if (args['-to'])
-              to = args['-to'];
-            req();
+          {
+            done: function (fromLang) {
+                    from = fromLang;
+                    liberator.log('lang: ' + fromLang);
+                    setPair();
+                    if (args['-to'])
+                      to = args['-to'];
+                    req();
+                  },
           }
         );
       }
@@ -307,19 +363,18 @@ let INFO = xml`
       literal: 0,
       bang: true,
       options:
-        let (actionTypes = [n for (n in actions)])
+        [
           [
-            [
-              ['-action', '-a'],
-              commands.OPTION_LIST,
-              makeListValidator(actionTypes),
-              actionTypes.map(function (v) [v, v]),
-              true
-            ],
-            [['-from', '-f'], commands.OPTION_STRING, null, languages],
-            [['-to', '-t'], commands.OPTION_STRING, null, languages],
-            [['-guess', '-g'], commands.OPTION_NOARG]
+            ['-action', '-a'],
+            commands.OPTION_LIST,
+            makeListValidator(actionTypes),
+            actionTypes.map(function (v) [v, v]),
+            true
           ],
+          [['-from', '-f'], commands.OPTION_STRING, null, languages],
+          [['-to', '-t'], commands.OPTION_STRING, null, languages],
+          [['-guess', '-g'], commands.OPTION_NOARG]
+        ],
     },
     true
   );

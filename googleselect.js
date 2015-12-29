@@ -1,6 +1,5 @@
-
 // PLUGIN_INFO {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
 <name>GoogleSelect</name>
 <name lang="ja">グーグルセレクト</name>
@@ -16,61 +15,118 @@ let PLUGIN_INFO = xml`
 // }}}
 
 (function () {
-  var google_url = 'https:\/\/www.google.co.jp\/search.*';
   /* user config */
+  // TODO: 外部ファイル化したい
+  let select_configs = [
+    {
+      name: 'google',
+      url: 'https?://www\.google\.co\.jp/search',
+      element_css_selector: '.r a',
+      marker_posfix: {
+        top: '0.0em',
+        left: '-1.0em'
+      }
+    }
+  ];
+/*
+独自設定は設定ファイルで変数を定義しておく
+liberator.globalVariables.googleSelectConfigs = [
+  {
+    name: 'github search',
+    url: 'https?://github\.com/search',
+    element_css_selector: '.codesearch-results .repo-list-item h3 a,.code-list-item p.title a:nth-of-type(2),.issue-list-item p.title a,.user-list-info>a',
+    marker_posfix: {
+      top: '0.0em',
+      left: '-1.0em'
+    }
+  }, {
+      name: 'google', // サービス名
+      url: 'https?://www\.google\.co\.jp/search', // 適用したいURLのマッチ正規表現
+      element_css_selector: '.r a', // アイテム要素を絞り込む CSSセレクタ
+      marker_posfix: { // マーカーの位置を修正
+        top: '0.0em',
+        left: '-1.0em'
+      }
+    },
+];
+*/
   // 選択状態表示マーカー
-  var SELECT_MARKER_CHAR = '▶';
+  let SELECT_MARKER_CHAR = '▶';
   // マーカー位置微調整
-  var SELECT_MARKER_REPOSITION_LEFT = '0em';
-  var SELECT_MARKER_REPOSITION_TOP = '0.3em';
+  let SELECT_MARKER_ID = 'google-select-pointer';
 
   /* hard config */
-  var GOOGLE_SELECTION_CLASS = 'r';
-  var GOOGLE_SELECTION_SELECTED_CLASS = 'r-selected';
+  let SELECTED_CLASS = 'vimpr_googleelect_selected';
 
   commands.addUserCommand(
       ['googleselect'],
       'move select in google search result',
       function (args) {
-        var v = 1;
+        let v = 1;
         if (args.length && args[0] == 'back') {
           v = -1;
         }
-        var $rs = window.content.window.document.getElementsByClassName(GOOGLE_SELECTION_CLASS);
-        var pre = -1;
-        for (var i = 0; i < $rs.length; i++) {
-          if ($rs[i].className.indexOf(GOOGLE_SELECTION_SELECTED_CLASS) != -1) {
-            pre = i;
+        // url から有効化する設定をチェック
+        let config = null;
+        if (liberator.globalVariables.googleSelectConfigs != 'undefined') {
+            select_configs = select_configs.concat(liberator.globalVariables.googleSelectConfigs);
+        }
+        for (var i = 0; i < select_configs.length; i ++) {
+          if (RegExp(select_configs[i].url).test(buffer.URL)) {
+            config = select_configs[i];
             break;
           }
         }
+        if (config == null) {
+          return;
+        }
+        // HACK: 適切でない？
+        // document DOM Element
+        let $doc = window.content.window.document;
+        // 選択対象となる要素
+        let $ses = $doc.querySelectorAll(config.element_css_selector);
+        let preIndex = -1;
+
         // ターゲット表示スタイル
-        var $pointer = window.content.window.document.createElement('span');
+        let $pointer = $doc.createElement('span');
         $pointer.style.color = 'blue';
-        $pointer.id = 'google-select-pointer';
+        $pointer.id = SELECT_MARKER_ID;
         $pointer.style.position = 'absolute';
-        $pointer.style.marginTop = SELECT_MARKER_REPOSITION_TOP;
-        $pointer.style.left = SELECT_MARKER_REPOSITION_LEFT;
+        $pointer.style.marginTop = config.marker_posfix.top;
+        $pointer.style.left = config.marker_posfix.left;
         $pointer.innerHTML = SELECT_MARKER_CHAR;
 
-        if (pre != -1) {
-          // 現在の選択状態削除
-          $rs[pre].className = GOOGLE_SELECTION_CLASS;
-//          $rs[pre].style.borderLeft = "none";
-          $rs[pre].childNodes[0].blur();
-          var $e = window.content.window.document.getElementById('google-select-pointer');
-          $e.parentNode.removeChild($e);
-        } else if (v == -1) {
-          pre = $rs.length;
+
+        // 指定した要素がなかったら終了
+        if ($ses.length == 0) {
+          // TODO: error 出力にしたい
+          liberator.echo('no selection element. [googleselect]');
+          return;
         }
-        if ((pre == 0 && v == -1) || (pre == $rs.length - 1 && v == 1)) {
+        // すでに選択している要素があったら index を取得
+        $sdes = $doc.getElementsByClassName(SELECTED_CLASS);
+        if ($sdes.length > 0) {
+          preIndex = Array.prototype.indexOf.call($ses, $sdes[0]);
+        }
+
+        if (preIndex != -1) {
+          // 現在の選択状態削除
+          $ses[preIndex].classList.remove(SELECTED_CLASS)
+          $ses[preIndex].childNodes[0].blur();
+          let $e = $doc.getElementById(SELECT_MARKER_ID);
+          $e.parentNode.removeChild($e);
+        }
+        let nextIndex = preIndex + v;
+        if (nextIndex == -2) {
+          nextIndex = $ses.length - 1;
+        }
+        if (nextIndex < 0 || $ses.length <= nextIndex) {
           return;
         }
 
-//        $rs[pre + v].style.borderLeft = "solid 5px blue";
-        $rs[pre + v].className = $rs[pre + v].className + " " + GOOGLE_SELECTION_SELECTED_CLASS;
-        $rs[pre + v].childNodes[0].focus();
-        $rs[pre + v].parentNode.parentNode.insertBefore($pointer, $rs[pre + v].parentNode.parentNode.firstChild);
+        $ses[nextIndex].classList.add(SELECTED_CLASS);
+        $ses[nextIndex].focus();
+        $ses[nextIndex].insertBefore($pointer, $ses[nextIndex].firstChild);
       },
       {
         literal: 0,
