@@ -80,12 +80,14 @@ function addCondMaps(cond, maps) {
 
     if (typeof action == "string") {
       var keys = mappings._expandLeader(action);
-      action = /^:/.test(keys)
-		 ? let (cmd = keys.replace(/^:/, ""))
-		     / $/.test(cmd)
-		       ? function() commandline.open("", cmd, modes.EX)
-		       : function() liberator.execute(cmd)
-		 : function() events.feedkeys(keys, extra.noremap, extra.silent);
+      if (/^:/.test(keys)) {
+	let cmd = keys.replace(/^:/, "");
+	action = / $/.test(cmd)
+		   ? function() commandline.open("", cmd, modes.EX)
+		   : function() liberator.execute(cmd)
+      } else {
+	action = function() events.feedkeys(keys, extra.noremap, extra.silent);
+      }
     }
     extra.matchingUrls = cond;
     mappings.addUserMap([modes.NORMAL], [key], "Mapping for " + cond, action, extra);
