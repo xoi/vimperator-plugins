@@ -95,8 +95,9 @@
       service.startSearch(context.filter, "", context.result, {
 	  onSearchResult: function onSearchResult(search, result) {
 	      timer.tell(result);
-	      if (!result.incomplete)
+	      if (!result.incomplete) {
 		  timer.flush();
+	      }
 	  }
       });
   }
