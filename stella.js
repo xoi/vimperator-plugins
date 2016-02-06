@@ -2038,6 +2038,8 @@ Thanks:
         true
       );
 
+      const CompletionContext = liberator.eval("CompletionContext", modules);
+
       let lastCompletions = [];
       commands.addUserCommand(
         ['strel[ations]'],

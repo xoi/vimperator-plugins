@@ -222,6 +222,8 @@ let PLUGIN_INFO = xml`
     return liberator.globalVariables.readcatlater_reverse ? result.reverse() : result;
   } catch (e) { liberator.log(e); } }
 
+  const CompletionContext = liberator.eval("CompletionContext", modules);
+
   function completer (context, arg) {
     context.compare = void 'meow';
     context.title = ['URL', 'Title'];

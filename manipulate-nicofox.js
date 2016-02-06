@@ -104,6 +104,7 @@
   function noop() {}
   var onUpdateDownloadItem = noop;
   var onCompleteLoadPanel = noop;
+  const CompletionContext = liberator.eval("CompletionContext", modules);
 
   var completer = {
     id: function(context) {

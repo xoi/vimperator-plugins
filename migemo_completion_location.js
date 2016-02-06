@@ -64,6 +64,8 @@
   }
   service.buildItemAt = function() {}
 
+  const CompletionContext = liberator.eval("CompletionContext", modules);
+
   // CHANGE:
   // %s/services.get("autoCompleteSearch")/service/
   // %s/result.searchResult >= result.RESULT_NOMATCH_ONGOING/result.incomplete/

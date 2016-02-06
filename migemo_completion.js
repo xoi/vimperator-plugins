@@ -25,9 +25,10 @@
   var XMigemoTextUtils = Components.classes["@piro.sakura.ne.jp/xmigemo/text-utility;1"]
                                    .getService(Components.interfaces.pIXMigemoTextUtils);
 
+  const CompletionContext = liberator.eval("CompletionContext", modules);
 
   var oldFilter,migemoPattern;
-  modules.CompletionContext.prototype.match = function (str){
+  CompletionContext.prototype.match = function (str){
       var filter = this.filter;
       if (this.anchored || !filter) return this._match(filter, str);
       if (oldFilter != filter) migemoPattern = new RegExp(XMigemoTextUtils.sanitize(filter) + "|" + XMigemoCore.getRegExp(filter),"i");
