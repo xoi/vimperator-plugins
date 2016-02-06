@@ -89,7 +89,8 @@
       onUpdateDownloadItem = onCompleteLoadPanel = noop;
       onComplete();
     };
-    let (orig = nicofox.panel.dbFail) {
+    {
+      let orig = nicofox.panel.dbFail;
       nicofox.panel.dbFail = function() {
 	onCompleteLoadPanel();
 	return orig.apply(this, arguments);
@@ -151,7 +152,8 @@
     }
   );
 
-  let (src) {
+  {
+    let src;
     // NicoFoxのtypoなんだけどまあいいか
     src = nicofox.panel.updateDownloadItem.toSource().replace('uploader_commment_file', 'uploader_comment_file');
     nicofox.panel.updateDownloadItem = eval(src);
