@@ -44,6 +44,7 @@ events._input.watch("buffer", function(id, oldval, newval) {
 });
 
 {
+  const Map = liberator.eval("Map", modules);
   let orig = Map.prototype.execute;
   Map.prototype.execute = function() {
     var ret = orig.apply(this, arguments);
