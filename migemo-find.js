@@ -30,17 +30,6 @@ migemo-find.js は pIXMigemoFind が提供している XUL/Migemo のインタ�
 liberator.plugins.migemoFind = (function() {
     let p = function(m) Application.console.log(m);
 
-    let evalWithContext = function(func, context) {
-        let str;
-        let fstr = func.toString();
-        if (fstr.indexOf('function () {') == 0) {
-            str = fstr.replace(/.*?{([\s\S]+)}.*?/m, "$1");
-        } else {
-            str = '(' + fstr + ')()';
-        }
-        return liberator.eval(str, context);
-    }
-
     var XMigemoFind;
     try {
         XMigemoFind = Cc['@piro.sakura.ne.jp/xmigemo/find;1']
@@ -79,30 +68,26 @@ liberator.plugins.migemoFind = (function() {
         }, false);
     }
 
-    evalWithContext(function () {
-       search.find = function (str) {
-           if (str.indexOf('\\') == 0) {
-               search.migemo.disable = true;
-               search._find(str.substr(1));
-           } else {
-               search.migemo.disable = false;
-               search.migemo.target = window.gBrowser;
-               search.migemo.find(false, str, options["linksearch"]);
-               searchString = searchPattern = search.migemo.lastFoundWord;
-           }
-       }
-    }, search._find);
+    search.find = function (str) {
+        if (str.indexOf('\\') == 0) {
+            search.migemo.disable = true;
+            search._find(str.substr(1));
+        } else {
+            search.migemo.disable = false;
+            search.migemo.target = window.gBrowser;
+            search.migemo.find(false, str, options["linksearch"]);
+            searchString = searchPattern = search.migemo.lastFoundWord;
+        }
+    }
 
-    evalWithContext(function () {
-       search.findAgain = function (reverse) {
-           let migemo = search.migemo;
-           if (migemo.disable) {
-               search._findAgain(reverse);
-           } else {
-               (!reverse) ? migemo.findNext(options["linksearch"]) : migemo.findPrevious(options["linksearch"]);
-           }
-       }
-    }, search._findAgain);
+    search.findAgain = function (reverse) {
+        let migemo = search.migemo;
+        if (migemo.disable) {
+            search._findAgain(reverse);
+        } else {
+            (!reverse) ? migemo.findNext(options["linksearch"]) : migemo.findPrevious(options["linksearch"]);
+        }
+    }
     return this;
 })();
 
