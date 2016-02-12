@@ -59,8 +59,8 @@ liberator.plugins.migemoFind = (function() {
 
     if (!search.migemoFindEvnetListener) {
         search.migemoFindEvnetListener = search.migemo.document.addEventListener('XMigemoFindProgress', function(ev) {
-            if (!ev.foundTerm) {
-                liberator.echoerr("E486: Pattern not found: " + ev.findTerm, commandline.FORCE_SINGLELINE);
+            if (!ev.detail.foundTerm) {
+                liberator.echoerr("E486: Pattern not found: " + ev.detail.findTerm, commandline.FORCE_SINGLELINE);
                 setFound(false);
             } else {
                 setFound(true);
