@@ -76,7 +76,7 @@ liberator.plugins.migemoFind = (function() {
             search.migemo.disable = false;
             search.migemo.target = window.gBrowser;
             search.migemo.find(false, str, options["linksearch"]);
-            searchString = searchPattern = search.migemo.lastFoundWord;
+            this.findbar._findField.value = search.migemo.lastFoundWord;
         }
     }
 
