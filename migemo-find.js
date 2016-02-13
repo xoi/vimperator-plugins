@@ -53,17 +53,10 @@ liberator.plugins.migemoFind = (function() {
     if (!search._findAgain)
         search._findAgain = search.findAgain;
 
-    let setFound = function(f) {
-        liberator.eval('found = ' + f.toString(), search._find);
-    }
-
     if (!search.migemoFindEvnetListener) {
         search.migemoFindEvnetListener = search.migemo.document.addEventListener('XMigemoFindProgress', function(ev) {
             if (!ev.detail.foundTerm) {
                 liberator.echoerr("E486: Pattern not found: " + ev.detail.findTerm, commandline.FORCE_SINGLELINE);
-                setFound(false);
-            } else {
-                setFound(true);
             }
         }, false);
     }
@@ -76,6 +69,7 @@ liberator.plugins.migemoFind = (function() {
             search.migemo.disable = false;
             search.migemo.target = window.gBrowser;
             search.migemo.find(false, str, options["linksearch"]);
+            this._searchPattern = str;
             this.findbar._findField.value = search.migemo.lastFoundWord;
         }
     }
