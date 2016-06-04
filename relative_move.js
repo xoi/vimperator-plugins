@@ -1,5 +1,5 @@
 // Vimperator plugin: Relative Move
-// Version: 0.1
+// Version: 0.3
 //
 // Usage:
 //   If you stay "http://example.com/aaa/bbb/ccc"
@@ -28,7 +28,7 @@
     function open_path(path, tab){
         var win = window.content.window;
         var loc = win.location;
-        var splited_path = path.split(/\/+/);
+        var splited_path = path.toString().split(/\/+/);
         var up = 0;
 
         if(!tab){
@@ -57,7 +57,7 @@
                 break;
             case -1: // "./hoge"
                 base = trim_query(loc.href);
-                path = path.substring(2);
+                path = path.toString().substring(2);
                 if(base[base.length-1] == "/")
                     url = base + path;
                 else
@@ -72,7 +72,7 @@
                 while(c < up){
                     if(c > 0) base = base.substr(0, base.length-1);
                     [base] = base.match(/^.*\/(?=[^\/]*$)/);
-                    path = path.substring(3);
+                    path = path.toString().substring(3);
                     c++;
                 }
                 url = base + path;

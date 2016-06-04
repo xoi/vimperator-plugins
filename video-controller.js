@@ -103,7 +103,23 @@ let INFO = xml`
       elem.mozRequestFullScreen();
     },
     seek: function (elem, value) {
-      elem.currentTime = timeCodeToSec(value);
+      if (value.match(/\d+%/)) {
+        elem.currentTime = elem.duration * parseInt(value, 10) / 100;
+      } else {
+        elem.currentTime = timeCodeToSec(value);
+      }
+    },
+    mute: function (elem) {
+      elem.muted = true;
+    },
+    unmute: function (elem) {
+      elem.muted = false;
+    },
+    loop: function (elem) {
+      elem.loop = true;
+    },
+    unloop: function (elem) {
+      elem.loop = false;
     },
     playbackRate: function (elem, value) {
       elem.playbackRate = value;
@@ -125,10 +141,9 @@ let INFO = xml`
     function (args) {
     },
     {
-      subCommands: [
-        (function () {
-          let o = it;
-          return new Command(
+      subCommands:
+        Object.keys(controlls).map(o =>
+          new Command(
             [o[0] + '[' + o.slice(1) + ']'],
             o + ' <video>',
             function (args) {
@@ -140,9 +155,7 @@ let INFO = xml`
               literal: 0
             }
           )
-        })()
-        for (it in controlls)
-      ],
+        )
     },
     true
   );

@@ -991,10 +991,11 @@ Thanks:
         ],
         [
           'tags',
-          XMLList([
-            xml`<span>[<a href=${v.href}>${v.textContent}</a>]</span>`
-            for ([, v] in Iterator(doc.querySelectorAll('#eow-tags > li > a')))
-          ].join(''))
+          XMLList(
+            Array.from(doc.querySelectorAll('#eow-tags > li > a')).map(function (v) {
+              return xml`<span>[<a href=${v.href}>${v.textContent}</a>]</span>`
+            }).join('')
+          )
         ],
         [
           'quality',
@@ -1148,10 +1149,11 @@ Thanks:
         ],
         [
           'tags',
-          XMLList([
-            xml`<span>[<a href=${v.href}>${v.textContent}</a>]</span>`
-            for ([, v] in Iterator(doc.querySelectorAll('#eow-tags > li > a')))
-          ].join(''))
+          XMLList(
+            Array.from(doc.querySelectorAll('#eow-tags > li > a')).map(function (v) {
+              return xml`<span>[<a href=${v.href}>${v.textContent}</a>]</span>`;
+            }).join('')
+          )
         ],
         [
           'quality',
@@ -1381,10 +1383,9 @@ Thanks:
         ['comment', U.toXML(v.description)],
         [
           'tag',
-          [
-            xml`<span>[<a href=${this.makeURL(t, Player.URL_TAG)}>${t}</a>]</span>`
-            for each (t in Array.slice(v.tags))
-          ].join('')
+          Array.from(v.tags).map(function (t) {
+            return xml`<span>[<a href=${this.makeURL(t, Player.URL_TAG)}>${t}</a>]</span>`;
+          }).join('')
         ]
       ];
     },
@@ -1472,7 +1473,9 @@ Thanks:
 
       function tagsFromPage () {
         let nodes = content.document.getElementsByClassName('nicopedia');
-        return [new RelatedTag(it.textContent) for each (it in nodes) if (it.rel == 'tag')];
+        return Array.from(nodes).filter(function (it) { return it.rel == 'tag'; }).map(function (it) {
+          return new RelatedTag(it.textContent);
+        });
       }
 
       return [].concat(IDsFromComment(), IDsFromAPI(), tagsFromPage());
@@ -2032,7 +2035,9 @@ Thanks:
             if (!self.player.has('qualities', 'r'))
               return;
             context.title = ['Quality', 'Description'];
-            context.completions = [[q, q] for each ([, q] in self.player.qualities)];
+            context.completions = Array.from(self.player.qualities).map(function (q) {
+              return [q, q];
+            });
           }
         },
         true
@@ -2093,8 +2098,9 @@ Thanks:
         function (verbose)
           (self.isValid && self.player.has('pageinfo', 'r')
             ? [
-                [n, xml`<div style="white-space: normal">${modules.template.maybeXML(v)}</div>`]
-                for each ([n, v] in self.player.pageinfo)
+                Array.from(Iterator(self.player.pageinfo)).map(function ([n, v]) {
+                  return [n, xml`<div style="white-space: normal">${modules.template.maybeXML(v)}</div>`];
+                })
               ]
             : [])
       );
@@ -2154,8 +2160,8 @@ Thanks:
 
       panel.appendChild(hbox);
       hbox.appendChild(icon);
-      [hbox.appendChild(label) for each (label in labels)];
-      [hbox.appendChild(toggle) for each (toggle in toggles)];
+      Array.from(Iterator(labels)).forEach(function ([, v]) { hbox.appendChild(v); });
+      Array.from(Iterator(toggles)).forEach(function ([, v]) { hbox.appendChild(v); });
 
       let menu = this.mainMenu = buildContextMenu({
         id: Stella.MAIN_MENU_ID,

@@ -2230,14 +2230,8 @@ let INFO = xml`
       hashtag:
         function(filter) {
           return makeTimelineCompleter(function(context, args){
-            context.completions = [
-              [
-                ['#' + h.text for ([, h] in Iterator(s.entities.hashtags))].join(' '),
-                s
-              ]
-              for ([, s] in Iterator(history))
-              if (s.entities && s.entities.hashtags && s.entities.hashtags[0])
-            ]
+            context.completions = history.filter(s => s.entities && s.entities.hashtags && s.entities.hashtags[0])
+                .map(s => [s.entities.hashtags.map(h => '#' + h.text).join(' '), s])
           });
         }
     };
@@ -2496,7 +2490,7 @@ let INFO = xml`
   // アクセストークン取得後 {{{
   function setup() {
     function findSubCommand(s) { // {{{
-      for (let [, cmd] in util.Array(SubCommands)) {
+      for (let [, cmd] in util.Array.iteritems(SubCommands)) {
         let m = cmd.match(s);
         if (m)
           return [cmd, m];
@@ -2676,8 +2670,8 @@ let INFO = xml`
   let tw = new TwitterOauth(Store);
 
   // ストリーム
-  let ChirpUserStream = Stream({ name: 'chirp stream', url: "https://userstream.twitter.com/2/user.json" });
-  let TrackingStream = Stream({ name: 'tracking stream', url: "https://stream.twitter.com/1/statuses/filter.json" });
+  let ChirpUserStream = Stream({ name: 'chirp stream', url: "https://userstream.twitter.com/1.1/user.json" });
+  let TrackingStream = Stream({ name: 'tracking stream', url: "https://stream.twitter.com/1.1/statuses/filter.json" });
 
   let startStreams = function () {
     ChirpUserStream.resetRestartCount();
