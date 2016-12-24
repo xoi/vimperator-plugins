@@ -19,11 +19,9 @@
  **/
 
 (function(){
-  var XMigemoCore = Components.classes["@piro.sakura.ne.jp/xmigemo/factory;1"]
-                              .getService(Components.interfaces.pIXMigemoFactory)
-                              .getService("ja");
-  var XMigemoTextUtils = Components.classes["@piro.sakura.ne.jp/xmigemo/text-utility;1"]
-                                   .getService(Components.interfaces.pIXMigemoTextUtils);
+  Cu.import("resource://xulmigemo-modules/core/core.js");
+  Cu.import("resource://xulmigemo-modules/core/textUtils.js");
+  var core = MigemoCoreFactory.get("ja");
 
   const CompletionContext = liberator.eval("CompletionContext", modules);
 
@@ -31,7 +29,7 @@
   CompletionContext.prototype.match = function (str){
       var filter = this.filter;
       if (this.anchored || !filter) return this._match(filter, str);
-      if (oldFilter != filter) migemoPattern = new RegExp(XMigemoTextUtils.sanitize(filter) + "|" + XMigemoCore.getRegExp(filter),"i");
+      if (oldFilter != filter) migemoPattern = new RegExp(MigemoTextUtils.sanitize(filter) + "|" + core.getRegExp(filter),"i");
 
       oldFilter = filter;
       return migemoPattern.test(str);
