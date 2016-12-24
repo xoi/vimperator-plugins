@@ -54,7 +54,7 @@ EOF
             let type;
             try
             {
-                switch (services.get('pref').getPrefType(conf.pref))
+                switch (services.get('prefs').getPrefType(conf.pref))
                 {
                 case Ci.nsIPrefBranch.PREF_STRING:
                     // XXX: string のとき、うまく user_pref に設定できていない?
@@ -74,14 +74,15 @@ EOF
             {
                 return liberator.echoerr('migrate-user-pref: error pref: ' + pref + ' ' + e);
             }
-
-            options.add(conf.command, conf.description, type,
-                (typeof conf.defaultValue == 'undefined' ? options.getPref(pref) : conf.defaultValue),
-                {
-                    setter: function(value) options.setPref(pref, value),
-                    getter: function() options.getPref(pref),
-                }
-            );
+            if (!options.get(conf.command[0])) {
+                options.add(conf.command, conf.description, type,
+                    (typeof conf.defaultValue == 'undefined' ? options.getPref(pref) : conf.defaultValue),
+                    {
+                        setter: function(value) options.setPref(pref, value),
+                        getter: function() options.getPref(pref),
+                    }
+                );
+            }
         });
     }
 

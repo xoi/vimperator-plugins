@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Command Menu</name>
   <description>Execute main-menu and tool-bar by ex-command.</description>
@@ -75,10 +75,7 @@ let PLUGIN_INFO = xml`
 
 (function () {
 
-  const migemo = Components
-                  .classes['@piro.sakura.ne.jp/xmigemo/factory;1']
-                  .getService(Components.interfaces.pIXMigemoFactory)
-                  .getService("ja");
+  const {XMigemoCore} = Components.utils.import('resource://xulmigemo-modules/service.jsm',{});
 
   function equal (x) function (y) x == y;
 
@@ -138,7 +135,7 @@ let PLUGIN_INFO = xml`
         !l                                                        ? 0 :
         l == it                                                   ? 1 :
         l.toLowerCase().indexOf(it.toLowerCase()) >= 0            ? 2 :
-        new RegExp(migemo.getRegExp(it.replace(/^\s+|\s+$/, '')),
+        new RegExp(XMigemoCore.getRegExp(it.replace(/^\s+|\s+$/, '')),
                    'i').test(l)                                   ? 3 :
                                                                     0);
 

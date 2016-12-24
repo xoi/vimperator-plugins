@@ -24,7 +24,7 @@
  */
 
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="Twittperator" version="1.19.2"
           href="https://github.com/vimpr/vimperator-plugins/raw/master/twittperator.js"
           summary="Twitter Client using OAuth and Streaming API">
@@ -641,7 +641,7 @@ let INFO = xml`
             OAuth.setParameter(message, "oauth_nonce", OAuth.nonce(6));
         },
         addToURL: function addToURL(url, parameters) {
-            newURL = url;
+            var newURL = url;
             if (parameters != null) {
                 var toAdd = OAuth.formEncode(parameters);
                 if (toAdd.length > 0) {

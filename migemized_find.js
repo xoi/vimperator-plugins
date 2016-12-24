@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // INFO {{{
-let INFO = xml`
+var INFO = xml`
   <plugin name="MigemizedFind" version="2.11.5"
           href="http://vimpr.github.com/"
           summary="Search and Highlight with Migemo."
@@ -84,15 +84,8 @@ let INFO = xml`
       </p></description>
     </item>
     <item>
-      <tags>g:migemized_find_language</tags>
-      <spec>let g:migemized_find_language = <a>lang</a></spec>
-      <description><p>
-        検索対象言語の設定
-      </p></description>
-    </item>
-    <item>
       <tags>g:migemized_find_history_limit</tags>
-      <spec>let g:migemized_history_limit = <a>number</a></spec>
+      <spec>let g:migemized_find_history_limit = <a>number</a></spec>
       <description><p>
         検索履歴の保存される最大数 (デフォルト: 100)
       </p></description>

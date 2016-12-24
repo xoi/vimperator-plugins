@@ -33,7 +33,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 }}} */
 
 // PLUGIN_INFO {{{
-let PLUGIN_INFO = xml`
+var PLUGIN_INFO = xml`
 <VimperatorPlugin>
   <name>Stella</name>
   <name lang="ja">すてら</name>
@@ -710,7 +710,7 @@ Thanks:
 
     get title () undefined,
 
-    get isValid () /^http:\/\/(tw|es|de|www)\.nicovideo\.jp\/(watch|playlist\/mylist)\//.test(U.currentURL),
+    get isValid () undefined,
 
     get volume () undefined,
     set volume (value) value,
@@ -913,7 +913,7 @@ Thanks:
 
     get totalTime () parseInt(this.player.duration),
 
-    get isValid () false,
+    get isValid () !!this.player,
 
     get volume () parseInt(this.player.volume * 100),
     set volume (value) (this.player.volume = value / 100),
@@ -984,6 +984,10 @@ Thanks:
     get pageinfo () {
       let doc = content.document;
       let desc = doc.querySelector('#eow-description');
+      let tags = [];
+      for (let v of doc.querySelectorAll('#eow-tags > li > a')) {
+        tags.push(xml`<span>[<a href=${v.href}>${v.textContent}</a>]</span>`)
+      }
       return [
         [
           'comment',
@@ -991,11 +995,7 @@ Thanks:
         ],
         [
           'tags',
-          XMLList(
-            Array.from(doc.querySelectorAll('#eow-tags > li > a')).map(function (v) {
-              return xml`<span>[<a href=${v.href}>${v.textContent}</a>]</span>`
-            }).join('')
-          )
+          XMLList(tags.join(''))
         ],
         [
           'quality',
@@ -1017,10 +1017,10 @@ Thanks:
     get relations () {
       let result = [];
       let doc = content.document;
-      for each (let item in Array.slice(doc.querySelectorAll('#watch-tags > div > a'))) {
+      for (let item of Array.slice(doc.querySelectorAll('#watch-tags > div > a'))) {
         result.push(new RelatedTag(item.textContent));
       }
-      for each (let item in Array.slice(doc.querySelectorAll('.video-list-item'))) {
+      for (let item of Array.slice(doc.querySelectorAll('.video-list-item'))) {
         let url = item.querySelector('a').href;
         if (!YouTubePlayer.isVideoURL(url))
           continue;
@@ -1142,6 +1142,10 @@ Thanks:
     get pageinfo () {
       let doc = content.document;
       let desc = doc.querySelector('#eow-description');
+      let tags = [];
+      for (let v of doc.querySelectorAll('#eow-tags > li > a')) {
+        tags.push(xml`<span>[<a href=${v.href}>${v.textContent}</a>]</span>`)
+      }
       return [
         [
           'comment',
@@ -1149,11 +1153,7 @@ Thanks:
         ],
         [
           'tags',
-          XMLList(
-            Array.from(doc.querySelectorAll('#eow-tags > li > a')).map(function (v) {
-              return xml`<span>[<a href=${v.href}>${v.textContent}</a>]</span>`;
-            }).join('')
-          )
+          XMLList(tags.join(''))
         ],
         [
           'quality',
@@ -1174,10 +1174,10 @@ Thanks:
     get relations () {
       let result = [];
       let doc = content.document;
-      for each (let item in Array.slice(doc.querySelectorAll('#watch-tags > div > a'))) {
+      for (let item of Array.slice(doc.querySelectorAll('#watch-tags > div > a'))) {
         result.push(new RelatedTag(item.textContent));
       }
-      for each (let item in Array.slice(doc.querySelectorAll('.video-list-item'))) {
+      for (let item of Array.slice(doc.querySelectorAll('.video-list-item'))) {
         let url = item.querySelector('a').href;
         if (!YouTubePlayer.isVideoURL(url))
           continue;
@@ -1271,7 +1271,7 @@ Thanks:
     get relations () {
       let result = [];
       let doc = content.document;
-      for each (let item in Array.slice(doc.querySelectorAll('div.playnav-item.playnav-video'))) {
+      for (let item of Array.slice(doc.querySelectorAll('div.playnav-item.playnav-video'))) {
         let link = item.querySelector('a.playnav-item-title.ellipsis');
         let url = link.href;
         if (!YouTubePlayer.isVideoURL(url))
@@ -1383,22 +1383,25 @@ Thanks:
         ['comment', U.toXML(v.description)],
         [
           'tag',
-          Array.from(v.tags).map(function (t) {
-            return xml`<span>[<a href=${this.makeURL(t, Player.URL_TAG)}>${t}</a>]</span>`;
-          }).join('')
+          Array.slice(v.tags).map(t => xml`<span>[<a href=${this.makeURL(t, Player.URL_TAG)}>${t}</a>]</span>`).join('')
         ]
       ];
     },
 
     get player () {
       return (
+        this.playerContainer ?
+        this.playerContainer.wrappedJSObject.__proto__ : null
+      );
+    },
+
+    get playerContainer () {
+      return (
         U.getElementById('flvplayer')
         ||
         U.getElementById('external_nicoplayer')
-      ).wrappedJSObject.__proto__;
+      );
     },
-
-    // get playerContainer () U.getElementByIdEx('flvplayer_container'),
 
     get ready () {
       try {
@@ -1428,7 +1431,7 @@ Thanks:
           let v, vs = xml.evaluate('//video', xml, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
           while (v = vs.iterateNext()) {
             let [cs, video] = [v.childNodes, {}];
-            for each (let c in cs)
+            for (let c of cs)
               if (c.nodeName != '#text')
                 video[c.nodeName] = c.textContent;
             videos.push(
@@ -1473,9 +1476,7 @@ Thanks:
 
       function tagsFromPage () {
         let nodes = content.document.getElementsByClassName('nicopedia');
-        return Array.from(nodes).filter(function (it) { return it.rel == 'tag'; }).map(function (it) {
-          return new RelatedTag(it.textContent);
-        });
+        return nodes.filter(it => it.rel == 'tag').map(it => new RelatedTag(it.textContent))
       }
 
       return [].concat(IDsFromComment(), IDsFromAPI(), tagsFromPage());
@@ -1519,6 +1520,8 @@ Thanks:
     get title () content.document.title.replace(/\s*\u002D\s*\u30CB\u30B3\u30CB\u30B3\u52D5\u753B(.+)$/, ''),
 
     get totalTime () parseInt(this.player.ext_getTotalTime()),
+
+    get isValid () (this.player && U.currentURL.match(/^http:\/\/(tw|es|de|www)\.nicovideo\.jp\/(watch|playlist\/mylist)\//)),
 
     get volume () parseInt(this.player.ext_getVolume()),
     set volume (value) (this.player.ext_setVolume(value), this.volume),
@@ -1909,7 +1912,8 @@ Thanks:
         youtube: new YouTubePlayer(this.stella),
         youtube5: new YouTubePlayer5(this.stella),
         youtubeuc: new YouTubeUserChannelPlayer(this.stella),
-        vimeo: new VimeoPlayer(this.stella)
+        vimeo: new VimeoPlayer(this.stella),
+        html5video: new VideoPlayer(this.stella)
       };
 
       // this.noGUI = true;
@@ -1931,7 +1935,7 @@ Thanks:
       this.removeStatusPanel();
       this.disable();
       this.progressListener.uninstall();
-      for each (let player in this.players)
+      for (let player of this.players)
         player.finalize();
       window.removeEventListener('resize', this.__onResize, false);
     },
@@ -2035,9 +2039,11 @@ Thanks:
             if (!self.player.has('qualities', 'r'))
               return;
             context.title = ['Quality', 'Description'];
-            context.completions = Array.from(self.player.qualities).map(function (q) {
-              return [q, q];
-            });
+            let completions = [];
+            self.player.qualities.forEach(
+              (q) => completions.push([q,q])
+            );
+            context.completions = completions;
           }
         },
         true
@@ -2097,11 +2103,9 @@ Thanks:
         'Stella Info',
         function (verbose)
           (self.isValid && self.player.has('pageinfo', 'r')
-            ? [
-                Array.from(Iterator(self.player.pageinfo)).map(function ([n, v]) {
-                  return [n, xml`<div style="white-space: normal">${modules.template.maybeXML(v)}</div>`];
-                })
-              ]
+            ? self.player.pageinfo.map(
+                ([n, v]) => [n, xml`<div style="white-space: normal">${modules.template.maybeXML(v)}</div>`]
+              )
             : [])
       );
     },
@@ -2151,7 +2155,7 @@ Thanks:
       let toggles = this.toggles = {};
       createLabel(labels, 'main', 2, 2);
       createLabel(labels, 'volume', 0, 2);
-      for each (let player in this.players) {
+      for (let [, player] of Iterator(this.players)) {
         for (let func in player.functions) {
           if (player.has(func, 't'))
             (func in labels) || createLabel(toggles, func);
@@ -2160,8 +2164,8 @@ Thanks:
 
       panel.appendChild(hbox);
       hbox.appendChild(icon);
-      Array.from(Iterator(labels)).forEach(function ([, v]) { hbox.appendChild(v); });
-      Array.from(Iterator(toggles)).forEach(function ([, v]) { hbox.appendChild(v); });
+      for (let k in labels) hbox.appendChild(labels[k]);
+      for (let k in toggles) hbox.appendChild(toggles[k]);
 
       let menu = this.mainMenu = buildContextMenu({
         id: Stella.MAIN_MENU_ID,
