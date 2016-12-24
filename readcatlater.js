@@ -191,7 +191,7 @@ let PLUGIN_INFO = xml`
   }
 
   function splitBySpaces (str) {
-    return [it for each (it in str.split(/\s+/)) if (/\w/.test(it))];
+    return [for (it of str.split(/\s+/)) if (/\w/.test(it)) it];
   }
 
   function RCL_Bookmarks () { try {
