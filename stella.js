@@ -875,6 +875,7 @@ Thanks:
       currentTime: 'rw',
       fetch: '',
       fileURL: '',
+      fullscreen: 'rwt',
       makeURL: '',
       muted: 'rw',
       pageinfo: '',
@@ -894,6 +895,15 @@ Thanks:
 
     get currentTime () parseInt(this.player.currentTime),
     set currentTime (value) (this.player.currentTime = value),
+
+    get fullscreen () content.document.fullscreenElement != null,
+    set fullscreen (value) {
+      if (value)
+        this.player.requestFullscreen();
+      else
+        content.document.exitFullscreen();
+      return value;
+    },
 
     get muted () this.player.muted,
     set muted (value) (this.player.muted = value),
