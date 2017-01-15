@@ -1704,6 +1704,121 @@ Thanks:
   // }}}
 
   /*********************************************************************************
+  * NicoPlayer5                                                                  {{{
+  *********************************************************************************/
+
+  function NicoPlayer5 () {
+    VideoPlayer.apply(this, arguments);
+  }
+
+  NicoPlayer5.prototype = {
+    __proto__: VideoPlayer.prototype,
+
+    functions: {
+      comment: 'rwt',
+      currentTime: 'rw',
+      fullscreen: 'rwt',
+      id: 'r',
+      makeURL: 'x',
+      muted: 'rwt',
+      pageinfo: 'r',
+      pause: 'x',
+      play: 'x',
+      playEx: 'x',
+      playOrPause: 'x',
+      repeating: 'rwt',
+      title: 'r',
+      totalTime: 'r',
+      volume: 'rw'
+    },
+
+    get comment () this.$('.CommentOnOffButton-iconHide') != null,
+    set comment (value) (this.$('.CommentOnOffButton').click(), value),
+
+    get currentTime () this.currentIsUad ? this.player.duration + this.uad.currentTime : this.player.currentTime,
+    set currentTime (value) (this.setRatio('.SeekBar .XSlider', value / this.totalTime), value),
+
+    get fileExtension () '.' + this.apiData.video.movieType,
+
+    get fullscreen () content.document.fullscreenElement != null,
+    set fullscreen (value) (this.$(value ? '.EnableFullScreenButton' : '.DisableFullScreenButton').click(), value),
+
+    get id () {
+      let m = U.currentURL.match(/\/(?:watch|playlist\/mylist)\/([a-z\d]+)/);
+      return (m && m[1]);
+    },
+
+    get muted () this.player.muted,
+    set muted (value) (this.$(value ? '.MuteVideoButton' : '.UnMuteVideoButton').click(), value),
+
+    get pageinfo () {
+      let apiData = this.apiData;
+      let v = apiData.video;
+      return [
+        ['thumbnail', xml`<img src=${v.thumbnailURL} />`],
+        ['comment', U.toXML(v.description)],
+        ['tag', apiData.tags.map(t => xml`<span>[<a href=${this.makeURL(t.name, Player.URL_TAG)}>${t.name}</a>]</span>`).join('')]
+      ];
+    },
+
+    get hasUad () !!this.$('.UadView-sponsorTop'),
+
+    get uad () this.$('audio'),
+
+    get currentIsUad () this.player.style.display == 'none',
+
+    get apiData () JSON.parse(content.document.getElementById('js-initial-watch-data').dataset.apiData),
+
+    get repeating () this.$('.PlayerRepeatOnButton').hidden,
+    set repeating (value) (this.$(value ? '.PlayerRepeatOnButton' : '.PlayerRepeatOffButton').click(), value),
+
+    get state () {
+      var player = this.currentIsUad ? this.uad : this.player;
+      if (player.ended)
+        return Player.ST_ENDED;
+      if (player.paused)
+        return Player.ST_PAUSED;
+      return Player.ST_PLAYING;
+    },
+
+    get title () this.apiData.video.title,
+
+    get totalTime () this.player.duration + (this.hasUad ? this.uad.duration : 0),
+
+    get isValid () (this.player && U.currentURL.match(/^http:\/\/(tw|es|de|www)\.nicovideo\.jp\/(watch|playlist\/mylist)\//)),
+
+    get volume () this.player.volume * 100,
+    set volume (value) (this.setRatio('.VolumeBar .XSlider', value / 100), value),
+
+    makeURL: function (value, type) {
+      switch (type) {
+        case Player.URL_ID:
+          return 'http://www.nicovideo.jp/watch/' + value;
+        case Player.URL_TAG:
+          return 'http://www.nicovideo.jp/tag/' + encodeURIComponent(value);
+        case Player.URL_SEARCH:
+          return 'http://www.nicovideo.jp/search/' + encodeURIComponent(value);
+      }
+      return value;
+    },
+
+    play: function () this.$('.PlayerPlayButton').click(),
+
+    pause: function () this.$('.PlayerPauseButton').click(),
+
+    $: function (selectors) content.document.querySelector(selectors),
+
+    setRatio: function (selectors, ratio) {
+      var element = this.$(selectors);
+      var clientX = ratio * element.offsetWidth + element.getBoundingClientRect().left;
+      var mouseEventInit = { bubbles: true, clientX: clientX };
+      ['mousedown', 'mouseup'].forEach(i => { element.dispatchEvent(new content.MouseEvent(i, mouseEventInit)); });
+    }
+  };
+
+  // }}}
+
+  /*********************************************************************************
   * VimeoPlayer                                                                  {{{
   *********************************************************************************/
 
@@ -1919,6 +2034,7 @@ Thanks:
 
       this.players = {
         niconico: new NicoPlayer(this.stella),
+        niconico5: new NicoPlayer5(this.stella),
         youtube: new YouTubePlayer(this.stella),
         youtube5: new YouTubePlayer5(this.stella),
         youtubeuc: new YouTubeUserChannelPlayer(this.stella),
