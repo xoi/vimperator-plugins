@@ -953,6 +953,7 @@ Thanks:
       currentTime: 'rw',
       fetch: 'x',
       fileURL: 'r',
+      fullscreen: 'rwt',
       makeURL: 'x',
       muted: 'rwt',
       pageinfo: 'r',
@@ -984,6 +985,9 @@ Thanks:
       let as = content.document.defaultView.wrappedJSObject.swfArgs;
       return 'http://www.youtube.com/get_video?fmt=22&video_id=' + as.video_id + '&t=' + as.t;
     },
+
+    get fullscreen () content.document.fullscreenElement != null,
+    set fullscreen (value) (value != this.fullscreen && this.$('.ytp-fullscreen-button').click(), value),
 
     get id ()
       YouTubePlayer.getIDfromURL(U.currentURL),
@@ -1101,7 +1105,9 @@ Thanks:
 
     play: function () this.player.playVideo(),
 
-    pause: function () this.player.pauseVideo()
+    pause: function () this.player.pauseVideo(),
+
+    $: function (selectors) content.document.querySelector(selectors)
   };
 
   // }}}
