@@ -1818,7 +1818,7 @@ Thanks:
       var element = this.$(selectors);
       var clientX = ratio * element.offsetWidth + element.getBoundingClientRect().left;
       var mouseEventInit = { bubbles: true, clientX: clientX };
-      ['mousedown', 'mouseup'].forEach(i => { element.dispatchEvent(new content.MouseEvent(i, mouseEventInit)); });
+      ['mousedown', 'mouseup', 'click'].forEach(i => { element.dispatchEvent(new content.MouseEvent(i, mouseEventInit)); });
     }
   };
 
