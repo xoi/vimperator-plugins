@@ -1537,7 +1537,7 @@ Thanks:
 
     get totalTime () parseInt(this.player.ext_getTotalTime()),
 
-    get isValid () (this.player && U.currentURL.match(/^http:\/\/(tw|es|de|www)\.nicovideo\.jp\/(watch|playlist\/mylist)\//)),
+    get isValid () (this.player && U.currentURL.match(/^https?:\/\/(tw|es|de|www)\.nicovideo\.jp\/(watch|playlist\/mylist)\//)),
 
     get volume () parseInt(this.player.ext_getVolume()),
     set volume (value) (this.player.ext_setVolume(value), this.volume),
@@ -1791,7 +1791,7 @@ Thanks:
 
     get totalTime () this.player.duration + (this.hasUad ? this.uad.duration : 0),
 
-    get isValid () (this.player && U.currentURL.match(/^http:\/\/(tw|es|de|www)\.nicovideo\.jp\/(watch|playlist\/mylist)\//)),
+    get isValid () (this.player && U.currentURL.match(/^https?:\/\/(tw|es|de|www)\.nicovideo\.jp\/(watch|playlist\/mylist)\//)),
 
     get volume () this.player.volume * 100,
     set volume (value) (this.setRatio('.VolumeBar .XSlider', value / 100), value),
